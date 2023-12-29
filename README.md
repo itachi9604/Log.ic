@@ -12,7 +12,7 @@ Log.ic is a Flask-based web application designed to simplify the viewing and ana
 ## How to Use
 **There are 2 ways.**
  - Creating and Running docker container
- - Running the pytthon code
+ - Running the python code
 
 ## Docker Way
   - navigate to the cloned project and build the image.
@@ -24,11 +24,12 @@ Log.ic is a Flask-based web application designed to simplify the viewing and ana
     docker run -p 80:80 -v /Users/tony.stark/Documents/logs:/app/logs  log.ic 
     ```
     You can replace **/Users/tony.stark/Documents/logs** with the directory where your log file will be generated.
-    To generate log file to a particular destination, while running pytest, give below params in pytest.ini
+    To generate log file to a particular destination, while running pytest, give below params in pytest.ini .
+    Remember to add log_file.log in the end in pytest.
     ```bash
     pytest -o "log_file=/Users/tony.stark/Documents/logs/log_file.log"
     ```
-    **Make Sure the -v path and -o path are same**
+    **Make Sure the -v path in your docker container command and -o path in your pytest argument are same**
     
 
 ### Prerequisites
@@ -38,6 +39,7 @@ Log.ic is a Flask-based web application designed to simplify the viewing and ana
 
 ### Getting Started
 **Clone And Run the repository:**
+
 
    ```bash
    git clone https://github.com/your-username/Log.ic.git
