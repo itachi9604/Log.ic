@@ -13,6 +13,10 @@ Log.ic is a Flask-based web application designed to simplify the viewing and ana
 **There are 2 ways.**
  - Creating and Running docker container
  - Running the python code
+ - directly pulling the docker image
+   ```bash
+    docker pull itachi9604/log.ic
+   ```
 
 ## Docker Way
   - navigate to the cloned project and build the image.
