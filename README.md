@@ -10,28 +10,42 @@ Log.ic is a Flask-based web application designed to simplify the viewing and ana
 - **Custom Styling:** Customize the appearance to suit your preferences.
 
 ## How to Use
-**There are 2 ways.**
- - Creating and Running docker container
- - Running the python code
+**There are 3 different ways.**
+ - Creating and Running docker container **(Check "Docker Way" section of this file)**
+ - Running the python code **(Check Bottom of this file)**
+
+   
  - directly pulling the docker image
    ```bash
     docker pull itachi9604/log.ic
    ```
+   1. create a directory somewhere , preferably in Documents. Lets say directory name is **pytest_logs** .
+   2. Navigate inside the directory using terminal. (Or open the directory in a terminal).
+    ```bash
+    docker run -p 8000:80 -v .:/app/logs itachi9604/log.ic 
+    ```
+   3. Now In your pycharm or framework, command should start like below and then rest of your parameters / arguments .
+      ```bash
+      pytest -o "log_file=/Users/tony.stark/Documents/pytest_logs/log_file.log"
+      ```
+   
 
 ## Docker Way
   - navigate to the cloned project and build the image.
     ```bash
     docker build -t log.ic .
     ```
-  - Creating the cotainer
+  - Creating the container
+    1. create a directory somewhere , preferably in Documents. Lets say directory name is **pytest_logs** .
+    2. Navigate inside the directory using terminal. (Or open the directory in a terminal).
     ```bash
-    docker run -p 80:80 -v /Users/tony.stark/Documents/logs:/app/logs  log.ic 
+    docker run -p 8000:80 -v .:/app/logs  log.ic 
     ```
-    You can replace **/Users/tony.stark/Documents/logs** with the directory where your log file will be generated.
+    You can replace **/Users/tony.stark/Documents/pytest_logs** with the directory where your log file will be generated.
     To generate log file to a particular destination, while running pytest, give below params in pytest.ini .
     Remember to add log_file.log in the end in pytest.
     ```bash
-    pytest -o "log_file=/Users/tony.stark/Documents/logs/log_file.log"
+    pytest -o "log_file=/Users/tony.stark/Documents/pytest_logs/log_file.log"
     ```
     **Make Sure the -v path in your docker container command and -o path in your pytest argument are same**
     
