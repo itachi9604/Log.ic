@@ -1,0 +1,78 @@
+/* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100% !important;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 8px;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.filters {
+    display: inline;
+    align-items: left;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+    position: fixed;
+    top: 0;
+    background-color: white;
+    width: 100%;
+    z-index: 1000;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.json {
+    white-space: pre-wrap;
+}
+
+.checkbox-larger .form-check-input {
+    width: 1.5em;
+    height: 1.5em;
+}
+
+.form-inline.my-2.my-lg-0 {
+    width: 150px;
+    margin-left: 20px;
+}
+
+.form-control.mr-sm-2 {
+    width: 40%;
+    margin-left: 20px;
+    border: 1px solid #495057;
+    color: #495057;
+}
+
+.form-control.mr-sm-2::placeholder {
+    color: #495057;
+}
+
+.btn.btn-outline-secondary {
+    background-color: #28a745;
+    color: #fff;
+    border-color: #28a745;
+}
+
+.btn-refresh-logs {
+    margin-left: 80px;
+}
+
+.log-header {
+    display: flex;
+    align-items: center;
+}
+
+/* Sticky Searchbar */

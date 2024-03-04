@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Pranay A. Patil">
+    <meta name="description" content="A portal for logs generated via Pytest">
+    <title>Log.ic</title>
+
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+
+    <!-- Bootstrap Stylesheet -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Custom Styles -->
+    <style>
+        /* Add custom styles here */
+        .request-response-log {
+            background-color: #f2f2f2; /* Grey background */
+            font-family: 'PT Mono', monospace; /* PT Mono font */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="filters">
+        <h3 class="ignore-flex">Log.ic</h3>
+
+        <!-- Filter form -->
+        <form method="get" action="{{ url_for('display_logs') }}" class="form-row align-items-center mt-2" id="filter-display">
+            {% for level in log_levels %}
+                <div class="form-check form-check-inline ml-2 checkbox-larger">
+                    <input class="form-check-input" type="checkbox" name="log_levels" value="{{ level }}" {% if level in selected_levels %}checked{% endif %}>
+                    <label class="form-check-label">{{ level }}</label>
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Apply Filter</button>
+            <a href="{{ url_for('refresh_logs', log_levels=selected_levels) }}" class="btn btn-secondary ml-8 btn-refresh-logs">Refresh Logs</a>
+
+            <form class="filter-form" id="logSearchInputForm">
+                <input class="form-control mr-sm-2 searchbar-fix" type="search" placeholder="Search logs" id="logSearchInput">
+            </form>
+        </form>
+    </div>
+
+    <table class="table" style="margin-top: 100px;">
+        <thead>
+            <tr>
+                {% for header in headers %}
+                    <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody id="logTableBody">
+            {% for log in beautified_logs %}
+                <tr>
+                    <td>{{ log[1] }}</td>
+                    <td style="color: {% if log[2] == '[ERROR]' %}#D22B2B{% elif log[2] == '[INFO]' %}#2E8B57{% endif %};">{{ log[2] }}</td>
+                    <td class="json {% if log[3].startswith("Request: ") or log[3].startswith("Response: ") %}request-response-log{% endif %}">{{ log[3] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="bottom"></div>
+
+    <script>
+    document.getElementById("logSearchInput").addEventListener("input", function() {
+        var searchText = this.value.toLowerCase();
+        var logTableBody = document.getElementById("logTableBody");
+        var logRows = logTableBody.getElementsByTagName("tr");
+
+        for (var i = 0; i < logRows.length; i++) {
+            var logRow = logRows[i];
+            var logCells = logRow.getElementsByTagName("td");
+            var logTextCell = logCells[2]; // Assuming log message is in the third column
+
+            var logText = logTextCell.getAttribute("data-original-text") || logTextCell.innerText;
+
+            // Show all rows if search text is empty
+            if (searchText === "") {
+                logRow.style.display = "";
+                logTextCell.innerHTML = logText;
+            } else {
+                // Reset previous highlights
+                logTextCell.innerHTML = logText;
+
+                // Highlight matched text
+                var matchIndex = logText.toLowerCase().indexOf(searchText);
+                if (matchIndex !== -1) {
+                    var matchedText = logText.substr(matchIndex, searchText.length);
+                    var highlightedLogText = logText.replace(new RegExp(matchedText, "gi"), '<span style="background-color: yellow;">$&</span>');
+                    logTextCell.innerHTML = highlightedLogText;
+                    logRow.style.display = "";
+                } else {
+                    // Hide rows that do not match the search text
+                    logRow.style.display = "none";
+                }
+            }
+        }
+        return false;
+    });
+</script>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Add any additional JavaScript scripts here -->
+</body>
+
+</html>
