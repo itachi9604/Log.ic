@@ -1,0 +1,8 @@
+services:
+  log-viewer:
+    build: .
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped

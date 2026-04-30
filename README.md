@@ -16,12 +16,56 @@ Log.ic is a Flask-based web application designed to simplify the viewing and ana
 
 The application reads from `logs/log_file.log`. This file is mounted as a volume from your host machine, so pytest can write to it continuously and the UI will reflect changes within 3 seconds.
 
-Expected log line format:
+---
+
+## Pytest Log Format
+
+For logs to be parsed correctly by Log.ic, each line must follow this format:
+
+```
+YYYY-MM-DD HH:MM:SS LEVEL  message
+```
+
+**Example:**
 ```
 2024-01-15 08:00:01 INFO  Application started successfully
 2024-01-15 08:01:20 ERROR Failed to connect to upstream service
 2024-01-15 08:02:01 DEBUG Scanning 1200 records for cleanup
 ```
+
+### Configure pytest to generate compatible logs
+
+Add the following to your `pytest.ini` or `pyproject.toml`:
+
+**`pytest.ini`**
+```ini
+[pytest]
+log_file = logs/log_file.log
+log_file_level = DEBUG
+log_file_format = %(asctime)s %(levelname)s  %(message)s
+log_file_date_format = %Y-%m-%d %H:%M:%S
+```
+
+**`pyproject.toml`**
+```toml
+[tool.pytest.ini_options]
+log_file = "logs/log_file.log"
+log_file_level = "DEBUG"
+log_file_format = "%(asctime)s %(levelname)s  %(message)s"
+log_file_date_format = "%Y-%m-%d %H:%M:%S"
+```
+
+> The format string `%(asctime)s %(levelname)s  %(message)s` with date format `%Y-%m-%d %H:%M:%S` produces lines that Log.ic can parse into **Date**, **Time**, **Level**, and **Log** columns.
+
+### Log levels captured
+
+| Level   | Description                        |
+|---------|------------------------------------|
+| `INFO`  | General test execution information |
+| `DEBUG` | Detailed diagnostic output         |
+| `ERROR` | Failures and exceptions            |
+
+Lines that do not match the expected format are shown under the `NO_FORMAT` category and are not included in level filters.
 
 ## How to Use
 
