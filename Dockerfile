@@ -10,11 +10,11 @@ COPY . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port 80 outside the container
-EXPOSE 80
+# Expose port 5555 outside the container
+EXPOSE 5555
 
 # Set an environment variable for the volume path
 ENV LOG_VOLUME_PATH /app/logs/log_file.log
 
 # Start the application
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:80", "wsgi:app"]
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5555", "wsgi:app"]
