@@ -8,109 +8,279 @@
     <meta name="description" content="A portal for logs generated via Pytest">
     <title>Log.ic</title>
 
-    <!-- External Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-
-    <!-- Bootstrap Stylesheet -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
-    <!-- Custom Styles -->
     <style>
-        /* Add custom styles here */
-        .request-response-log {
-            background-color: #f2f2f2; /* Grey background */
-            font-family: 'PT Mono', monospace; /* PT Mono font */
+        body { background: #0f1117; color: #c9d1d9; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: #161b22; border-bottom: 1px solid #21262d;
+            padding: 12px 28px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+        }
+        .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -1px; margin-right: 8px; }
+        .logo span:nth-child(1) { color: #58a6ff; }
+        .logo span:nth-child(2) { color: #e94560; }
+        .logo span:nth-child(3) { color: #c9d1d9; }
+
+        .filter-btn {
+            padding: 5px 16px; border-radius: 20px; border: 1.5px solid transparent;
+            font-size: 0.8rem; font-weight: 600; cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s;
+            background: transparent;
+        }
+        .badge-count {
+            background: rgba(255,255,255,0.12); border-radius: 10px;
+            padding: 1px 7px; font-size: 0.7rem;
+        }
+        .btn-ALL   { border-color: #6e7681; color: #6e7681; }
+        .btn-ALL.active, .btn-ALL:hover   { background: #6e7681 !important; color: #0f1117; }
+        .btn-INFO  { border-color: #3fb950; color: #3fb950; }
+        .btn-INFO.active, .btn-INFO:hover  { background: #3fb950 !important; color: #0f1117; }
+        .btn-ERROR { border-color: #f85149; color: #f85149; }
+        .btn-ERROR.active, .btn-ERROR:hover { background: #f85149 !important; color: #0f1117; }
+        .btn-DEBUG { border-color: #58a6ff; color: #58a6ff; }
+        .btn-DEBUG.active, .btn-DEBUG:hover { background: #58a6ff !important; color: #0f1117; }
+
+        .search-wrap { margin-left: auto; }
+        .search-wrap input {
+            background: #0d1117; border: 1px solid #30363d; color: #c9d1d9;
+            border-radius: 6px; padding: 5px 12px; font-size: 0.82rem; width: 220px;
+        }
+        .search-wrap input:focus { outline: none; border-color: #58a6ff; }
+
+        .live-badge {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.75rem; color: #3fb950; font-weight: 600; white-space: nowrap;
+        }
+        .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #3fb950; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+        .live-badge.stale { color: #6e7681; }
+        .live-badge.stale .live-dot { background: #6e7681; animation: none; }
+
+        .content { margin-top: 80px; padding: 16px 28px 40px; }
+
+        .meta { font-size: 0.76rem; color: #6e7681; margin-bottom: 12px;
+                display: flex; justify-content: space-between; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+        thead tr { background: #161b22; border-bottom: 2px solid #21262d; }
+        thead th {
+            padding: 10px 14px; text-align: left; color: #8b949e;
+            font-weight: 600; text-transform: uppercase; font-size: 0.72rem;
+            letter-spacing: 0.8px; white-space: nowrap;
+        }
+        tbody tr { border-bottom: 1px solid #161b22; transition: background 0.1s; }
+        tbody tr:hover { background: #161b22; }
+        td { padding: 8px 14px; vertical-align: middle; }
+
+        .col-date    { color: #8b949e; white-space: nowrap; width: 105px; }
+        .col-time    { color: #8b949e; white-space: nowrap; width: 90px; font-family: monospace; }
+        .col-level   { width: 85px; }
+        .col-message { font-family: 'Courier New', monospace; word-break: break-word; }
+
+        .pill {
+            display: inline-block; padding: 2px 10px; border-radius: 12px;
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;
+        }
+        .pill-INFO      { background: rgba(63,185,80,0.15);  color: #3fb950; border: 1px solid rgba(63,185,80,0.3); }
+        .pill-ERROR     { background: rgba(248,81,73,0.15);  color: #f85149; border: 1px solid rgba(248,81,73,0.3); }
+        .pill-DEBUG     { background: rgba(88,166,255,0.15); color: #58a6ff; border: 1px solid rgba(88,166,255,0.3); }
+        .pill-NO_FORMAT { background: rgba(110,118,129,0.15); color: #8b949e; border: 1px solid rgba(110,118,129,0.3); }
+
+        .highlight { background-color: #bb8009; color: #0f1117; border-radius: 2px; padding: 0 2px; }
+
+        .empty-row td { text-align: center; padding: 40px; color: #6e7681; font-style: italic; }
+        .error-box {
+            background: #1a0a0a; border: 1px solid #f85149; border-radius: 8px;
+            padding: 14px 18px; color: #f85149; font-size: 0.88rem; margin-bottom: 16px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="filters">
-        <h3 class="ignore-flex">Log.ic</h3>
-
-        <!-- Filter form -->
-        <form method="get" action="{{ url_for('display_logs') }}" class="form-row align-items-center mt-2" id="filter-display">
-            {% for level in log_levels %}
-                <div class="form-check form-check-inline ml-2 checkbox-larger">
-                    <input class="form-check-input" type="checkbox" name="log_levels" value="{{ level }}" {% if level in selected_levels %}checked{% endif %}>
-                    <label class="form-check-label">{{ level }}</label>
-                </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Apply Filter</button>
-            <a href="{{ url_for('refresh_logs', log_levels=selected_levels) }}" class="btn btn-secondary ml-8 btn-refresh-logs">Refresh Logs</a>
-
-            <form class="filter-form" id="logSearchInputForm">
-                <input class="form-control mr-sm-2 searchbar-fix" type="search" placeholder="Search logs" id="logSearchInput">
-            </form>
-        </form>
+<div class="topbar">
+    <div class="logo">
+        <span>Log</span><span>.</span><span>ic</span>
     </div>
 
-    <table class="table" style="margin-top: 100px;">
+    <!-- Filter buttons -->
+    <button class="filter-btn btn-ALL {% if log_levels | length == selected_levels | length %}active{% endif %}"
+            onclick="setFilter('ALL')">
+        ALL <span class="badge-count" id="count-ALL">{{ counts.values()|sum }}</span>
+    </button>
+    {% for lvl in log_levels %}
+    <button class="filter-btn btn-{{ lvl }} {% if selected_levels == [lvl] %}active{% endif %}"
+            onclick="setFilter('{{ lvl }}')">
+        {{ lvl }} <span class="badge-count" id="count-{{ lvl }}">{{ counts.get(lvl, 0) }}</span>
+    </button>
+    {% endfor %}
+
+    <div class="search-wrap">
+        <input type="search" id="logSearchInput" placeholder="Search logs...">
+    </div>
+
+    <div class="live-badge" id="liveBadge">
+        <div class="live-dot"></div>
+        <span id="liveLabel">LIVE</span>
+    </div>
+</div>
+
+<div class="content">
+    {% if error %}
+    <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <div class="meta">
+        <span id="rowCount">{{ logs|length }} entries</span>
+        <span>Auto-refresh every 3s &bull; last updated: <span id="lastUpdated">just now</span></span>
+    </div>
+
+    <table id="logTable">
         <thead>
             <tr>
-                {% for header in headers %}
-                    <th>{{ header }}</th>
-                {% endfor %}
+                <th>Date</th>
+                <th>Time</th>
+                <th>Level</th>
+                <th>Log</th>
             </tr>
         </thead>
         <tbody id="logTableBody">
-            {% for log in beautified_logs %}
+            {% if logs %}
+                {% for entry in logs %}
                 <tr>
-                    <td>{{ log[1] }}</td>
-                    <td style="color: {% if log[2] == '[ERROR]' %}#D22B2B{% elif log[2] == '[INFO]' %}#2E8B57{% endif %};">{{ log[2] }}</td>
-                    <td class="json {% if log[3].startswith("Request: ") or log[3].startswith("Response: ") %}request-response-log{% endif %}">{{ log[3] }}</td>
+                    <td class="col-date">{{ entry.date }}</td>
+                    <td class="col-time">{{ entry.time }}</td>
+                    <td class="col-level"><span class="pill pill-{{ entry.level }}">{{ entry.level }}</span></td>
+                    <td class="col-message">{{ entry.message }}</td>
                 </tr>
-            {% endfor %}
+                {% endfor %}
+            {% else %}
+                <tr class="empty-row"><td colspan="4">No log entries found.</td></tr>
+            {% endif %}
         </tbody>
     </table>
+</div>
 
-    <div id="bottom"></div>
+<script>
+    const LOG_LEVELS = {{ log_levels | tojson }};
+    let activeFilter = {{ (selected_levels | tojson) }};
+    let searchText = '';
 
-    <script>
-    document.getElementById("logSearchInput").addEventListener("input", function() {
-        var searchText = this.value.toLowerCase();
-        var logTableBody = document.getElementById("logTableBody");
-        var logRows = logTableBody.getElementsByTagName("tr");
+    // ── Filter ──────────────────────────────────────────────
+    function setFilter(level) {
+        activeFilter = level === 'ALL' ? [...LOG_LEVELS] : [level];
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        const btn = document.querySelector(`.btn-${level}`);
+        if (btn) btn.classList.add('active');
+        fetchLogs();
+    }
 
-        for (var i = 0; i < logRows.length; i++) {
-            var logRow = logRows[i];
-            var logCells = logRow.getElementsByTagName("td");
-            var logTextCell = logCells[2]; // Assuming log message is in the third column
-
-            var logText = logTextCell.getAttribute("data-original-text") || logTextCell.innerText;
-
-            // Show all rows if search text is empty
-            if (searchText === "") {
-                logRow.style.display = "";
-                logTextCell.innerHTML = logText;
-            } else {
-                // Reset previous highlights
-                logTextCell.innerHTML = logText;
-
-                // Highlight matched text
-                var matchIndex = logText.toLowerCase().indexOf(searchText);
-                if (matchIndex !== -1) {
-                    var matchedText = logText.substr(matchIndex, searchText.length);
-                    var highlightedLogText = logText.replace(new RegExp(matchedText, "gi"), '<span style="background-color: yellow;">$&</span>');
-                    logTextCell.innerHTML = highlightedLogText;
-                    logRow.style.display = "";
-                } else {
-                    // Hide rows that do not match the search text
-                    logRow.style.display = "none";
-                }
-            }
-        }
-        return false;
+    // ── Search ──────────────────────────────────────────────
+    document.getElementById('logSearchInput').addEventListener('input', function () {
+        searchText = this.value.toLowerCase();
+        applySearch();
     });
+
+    function applySearch() {
+        const rows = document.querySelectorAll('#logTableBody tr:not(.empty-row)');
+        rows.forEach(row => {
+            const msgCell = row.querySelector('.col-message');
+            if (!msgCell) return;
+            const original = msgCell.getAttribute('data-original') || msgCell.textContent;
+            msgCell.setAttribute('data-original', original);
+
+            if (!searchText) {
+                msgCell.textContent = original;
+                row.style.display = '';
+                return;
+            }
+            const idx = original.toLowerCase().indexOf(searchText);
+            if (idx !== -1) {
+                const before = escapeHtml(original.slice(0, idx));
+                const match  = escapeHtml(original.slice(idx, idx + searchText.length));
+                const after  = escapeHtml(original.slice(idx + searchText.length));
+                msgCell.innerHTML = `${before}<span class="highlight">${match}</span>${after}`;
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // ── Auto-refresh ─────────────────────────────────────────
+    function escapeHtml(s) {
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function pillClass(level) {
+        return `pill pill-${level}`;
+    }
+
+    function buildRows(logs) {
+        if (!logs || logs.length === 0)
+            return `<tr class="empty-row"><td colspan="4">No log entries found.</td></tr>`;
+        return logs.map(e => `
+            <tr>
+                <td class="col-date">${escapeHtml(e.date)}</td>
+                <td class="col-time">${escapeHtml(e.time)}</td>
+                <td class="col-level"><span class="${pillClass(e.level)}">${escapeHtml(e.level)}</span></td>
+                <td class="col-message">${escapeHtml(e.message)}</td>
+            </tr>`).join('');
+    }
+
+    async function fetchLogs() {
+        const params = activeFilter.map(l => `log_levels=${l}`).join('&');
+        try {
+            const res = await fetch(`/logs?${params}`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            if (data.error) {
+                document.querySelector('.content').insertAdjacentHTML(
+                    'afterbegin', `<div class="error-box">${escapeHtml(data.error)}</div>`);
+                return;
+            }
+
+            const atBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 40;
+            document.getElementById('logTableBody').innerHTML = buildRows(data.logs);
+            if (atBottom) window.scrollTo(0, document.body.scrollHeight);
+
+            if (searchText) applySearch();
+
+            // Update counts
+            let total = 0;
+            LOG_LEVELS.forEach(lvl => {
+                const c = data.counts[lvl] || 0;
+                total += c;
+                const el = document.getElementById(`count-${lvl}`);
+                if (el) el.textContent = c;
+            });
+            const allEl = document.getElementById('count-ALL');
+            if (allEl) allEl.textContent = total;
+
+            document.getElementById('rowCount').textContent = `${data.logs ? data.logs.length : 0} entries`;
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+
+            const badge = document.getElementById('liveBadge');
+            badge.classList.remove('stale');
+            document.getElementById('liveLabel').textContent = 'LIVE';
+
+        } catch {
+            const badge = document.getElementById('liveBadge');
+            badge.classList.add('stale');
+            document.getElementById('liveLabel').textContent = 'PAUSED';
+        }
+    }
+
+    setInterval(fetchLogs, 3000);
 </script>
 
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <!-- Add any additional JavaScript scripts here -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
-
 </html>

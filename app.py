@@ -1,51 +1,84 @@
-from flask import Flask, render_template, request, redirect, url_for, Response
+import re
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 
 app = Flask(__name__, template_folder='templates')
 
+LOG_FILE = "logs/log_file.log"
+LOG_LEVELS = ["INFO", "DEBUG", "ERROR"]
 
-def read_log_lines():
+LOG_PATTERN = re.compile(
+    r"^(?P<date>\d{4}-\d{2}-\d{2})\s+(?P<time>\d{2}:\d{2}:\d{2})\s+(?P<level>INFO|ERROR|DEBUG)\s+(?P<message>.+)$"
+)
+
+
+def parse_logs(filter_levels=None):
+    entries = []
     try:
-        with open("logs/log_file.log", 'r') as f:
+        with open(LOG_FILE, "r") as f:
             for line in f:
-                yield line
+                line = line.rstrip("\n")
+                match = LOG_PATTERN.match(line)
+                if match:
+                    entry = {
+                        "date": match.group("date"),
+                        "time": match.group("time"),
+                        "level": match.group("level"),
+                        "message": match.group("message"),
+                    }
+                else:
+                    entry = {
+                        "date": "",
+                        "time": "",
+                        "level": "NO_FORMAT",
+                        "message": line,
+                    }
+                if filter_levels and entry["level"] not in filter_levels:
+                    continue
+                entries.append(entry)
     except FileNotFoundError:
-        yield "Log file not found"
-    except Exception as e:
-        yield f"An error occurred while reading the log file: {str(e)}"
+        return None, f"{LOG_FILE} not found."
+    return entries, None
 
 
-def split_log_line(line):
-    try:
-        return line.split(' ', 3) if len(line.split(' ', 3)) == 4 else ['', '', '[NO_FORMAT]', line]
-    except Exception as e:
-        return ['', '', '[NO_FORMAT]', f"Error while processing log line: {str(e)}"]
+def get_counts():
+    all_entries, _ = parse_logs()
+    counts = {lvl: 0 for lvl in LOG_LEVELS}
+    if all_entries:
+        for e in all_entries:
+            if e["level"] in counts:
+                counts[e["level"]] += 1
+    return counts
 
 
 @app.route('/')
 def display_logs():
-    try:
-        logs = [split_log_line(line) for line in read_log_lines()]
-    except ValueError as ve:
-        logs = [str(ve)]
-    except Exception as e:
-        logs = [f"An error occurred: {str(e)}"]
+    selected_levels = request.args.getlist('log_levels') or LOG_LEVELS
+    logs, error = parse_logs(selected_levels)
+    counts = get_counts()
+    return render_template(
+        "logs.html",
+        logs=logs or [],
+        error=error,
+        log_levels=LOG_LEVELS,
+        selected_levels=selected_levels,
+        counts=counts,
+    )
 
-    selected_levels = request.args.getlist('log_levels') or ["INFO", "ERROR", "NO_FORMAT"]
 
-    filtered_logs = [log for log in logs if any(level in log[2] for level in selected_levels)]
-    beautified_logs = [log for log in filtered_logs]
-
-    headers = ["Time", "Level", "Log"]
-    log_levels = ["INFO", "DEBUG", "ERROR", "NO_FORMAT"]
-
-    return render_template("logs.html", logs=logs, headers=headers, log_levels=log_levels,
-                           selected_levels=selected_levels, beautified_logs=beautified_logs)
+@app.route('/logs')
+def logs_api():
+    selected_levels = request.args.getlist('log_levels') or LOG_LEVELS
+    logs, error = parse_logs(selected_levels)
+    if error:
+        return jsonify({"error": error}), 500
+    counts = get_counts()
+    return jsonify({"logs": logs, "counts": counts})
 
 
 @app.route('/refresh')
 def refresh_logs():
-    selected_levels = request.args.getlist('log_levels') or ["INFO"]
-    return redirect(url_for('display_logs', log_levels=selected_levels, _anchor='bottom'))
+    selected_levels = request.args.getlist('log_levels') or LOG_LEVELS
+    return redirect(url_for('display_logs', log_levels=selected_levels))
 
 
 if __name__ == '__main__':
