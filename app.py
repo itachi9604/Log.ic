@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 
 app = Flask(__name__, template_folder='templates')
 
-LOG_FILE = "logs/op.txt"
+LOG_FILE = "logs/log_file.log"
 LOG_LEVELS = ["INFO", "DEBUG", "ERROR"]
 
 LOG_PATTERN = re.compile(
