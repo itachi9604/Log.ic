@@ -51,6 +51,19 @@
         }
         .search-wrap input:focus { outline: none; border-color: #58a6ff; }
 
+        .font-size-wrap {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.75rem; color: #6e7681; white-space: nowrap;
+        }
+        .font-size-wrap span { min-width: 32px; text-align: center; color: #c9d1d9; font-size: 0.78rem; }
+        .font-btn {
+            background: #0d1117; border: 1px solid #30363d; color: #c9d1d9;
+            border-radius: 4px; width: 26px; height: 26px; cursor: pointer;
+            font-size: 1rem; line-height: 1; display: flex; align-items: center;
+            justify-content: center; transition: border-color 0.15s;
+        }
+        .font-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+
         .live-badge {
             display: flex; align-items: center; gap: 6px;
             font-size: 0.75rem; color: #3fb950; font-weight: 600; white-space: nowrap;
@@ -65,7 +78,7 @@
         .meta { font-size: 0.76rem; color: #6e7681; margin-bottom: 12px;
                 display: flex; justify-content: space-between; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+        table { width: 100%; border-collapse: collapse; font-size: var(--log-font-size, 0.83rem); }
         thead tr { background: #161b22; border-bottom: 2px solid #21262d; }
         thead th {
             padding: 10px 14px; text-align: left; color: #8b949e;
@@ -121,6 +134,13 @@
 
     <div class="search-wrap">
         <input type="search" id="logSearchInput" placeholder="Search logs...">
+    </div>
+
+    <!-- Font size control -->
+    <div class="font-size-wrap">
+        <button class="font-btn" onclick="changeFontSize(-1)" title="Decrease font size">−</button>
+        <span id="fontSizeLabel">13px</span>
+        <button class="font-btn" onclick="changeFontSize(1)" title="Increase font size">+</button>
     </div>
 
     <div class="live-badge" id="liveBadge">
@@ -275,6 +295,23 @@
             document.getElementById('liveLabel').textContent = 'PAUSED';
         }
     }
+
+    // ── Font size ─────────────────────────────────────────────
+    const MIN_FONT = 10, MAX_FONT = 24;
+    let fontSize = parseInt(localStorage.getItem('logFontSize')) || 13;
+
+    function applyFontSize() {
+        document.documentElement.style.setProperty('--log-font-size', fontSize + 'px');
+        document.getElementById('fontSizeLabel').textContent = fontSize + 'px';
+        localStorage.setItem('logFontSize', fontSize);
+    }
+
+    function changeFontSize(delta) {
+        fontSize = Math.min(MAX_FONT, Math.max(MIN_FONT, fontSize + delta));
+        applyFontSize();
+    }
+
+    applyFontSize();
 
     setInterval(fetchLogs, 3000);
 </script>
