@@ -10,114 +10,13 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-    <style>
-        body { background: #0f1117; color: #c9d1d9; font-family: 'Segoe UI', system-ui, sans-serif; }
-
-        .topbar {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            background: #161b22; border-bottom: 1px solid #21262d;
-            padding: 12px 28px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-        }
-        .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -1px; margin-right: 8px; }
-        .logo span:nth-child(1) { color: #58a6ff; }
-        .logo span:nth-child(2) { color: #e94560; }
-        .logo span:nth-child(3) { color: #c9d1d9; }
-
-        .filter-btn {
-            padding: 5px 16px; border-radius: 20px; border: 1.5px solid transparent;
-            font-size: 0.8rem; font-weight: 600; cursor: pointer; text-decoration: none;
-            display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s;
-            background: transparent;
-        }
-        .badge-count {
-            background: rgba(255,255,255,0.12); border-radius: 10px;
-            padding: 1px 7px; font-size: 0.7rem;
-        }
-        .btn-ALL   { border-color: #6e7681; color: #6e7681; }
-        .btn-ALL.active, .btn-ALL:hover   { background: #6e7681 !important; color: #0f1117; }
-        .btn-INFO  { border-color: #3fb950; color: #3fb950; }
-        .btn-INFO.active, .btn-INFO:hover  { background: #3fb950 !important; color: #0f1117; }
-        .btn-ERROR { border-color: #f85149; color: #f85149; }
-        .btn-ERROR.active, .btn-ERROR:hover { background: #f85149 !important; color: #0f1117; }
-        .btn-DEBUG { border-color: #58a6ff; color: #58a6ff; }
-        .btn-DEBUG.active, .btn-DEBUG:hover { background: #58a6ff !important; color: #0f1117; }
-
-        .search-wrap { margin-left: auto; }
-        .search-wrap input {
-            background: #0d1117; border: 1px solid #30363d; color: #c9d1d9;
-            border-radius: 6px; padding: 5px 12px; font-size: 0.82rem; width: 220px;
-        }
-        .search-wrap input:focus { outline: none; border-color: #58a6ff; }
-
-        .font-size-wrap {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 0.75rem; color: #6e7681; white-space: nowrap;
-        }
-        .font-size-wrap span { min-width: 32px; text-align: center; color: #c9d1d9; font-size: 0.78rem; }
-        .font-btn {
-            background: #0d1117; border: 1px solid #30363d; color: #c9d1d9;
-            border-radius: 4px; width: 26px; height: 26px; cursor: pointer;
-            font-size: 1rem; line-height: 1; display: flex; align-items: center;
-            justify-content: center; transition: border-color 0.15s;
-        }
-        .font-btn:hover { border-color: #58a6ff; color: #58a6ff; }
-
-        .live-badge {
-            display: flex; align-items: center; gap: 6px;
-            font-size: 0.75rem; color: #3fb950; font-weight: 600; white-space: nowrap;
-        }
-        .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #3fb950; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
-        .live-badge.stale { color: #6e7681; }
-        .live-badge.stale .live-dot { background: #6e7681; animation: none; }
-
-        .content { margin-top: 80px; padding: 16px 28px 40px; }
-
-        .meta { font-size: 0.76rem; color: #6e7681; margin-bottom: 12px;
-                display: flex; justify-content: space-between; }
-
-        table { width: 100%; border-collapse: collapse; font-size: var(--log-font-size, 0.83rem); }
-        thead tr { background: #161b22; border-bottom: 2px solid #21262d; }
-        thead th {
-            padding: 10px 14px; text-align: left; color: #8b949e;
-            font-weight: 600; text-transform: uppercase; font-size: 0.72rem;
-            letter-spacing: 0.8px; white-space: nowrap;
-        }
-        tbody tr { border-bottom: 1px solid #161b22; transition: background 0.1s; }
-        tbody tr:hover { background: #161b22; }
-        td { padding: 8px 14px; vertical-align: middle; }
-
-        .col-date    { color: #8b949e; white-space: nowrap; width: 105px; }
-        .col-time    { color: #8b949e; white-space: nowrap; width: 90px; font-family: monospace; }
-        .col-level   { width: 85px; }
-        .col-message { font-family: 'Courier New', monospace; word-break: break-word; }
-
-        .pill {
-            display: inline-block; padding: 2px 10px; border-radius: 12px;
-            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;
-        }
-        .pill-INFO      { background: rgba(63,185,80,0.15);  color: #3fb950; border: 1px solid rgba(63,185,80,0.3); }
-        .pill-ERROR     { background: rgba(248,81,73,0.15);  color: #f85149; border: 1px solid rgba(248,81,73,0.3); }
-        .pill-DEBUG     { background: rgba(88,166,255,0.15); color: #58a6ff; border: 1px solid rgba(88,166,255,0.3); }
-        .pill-NO_FORMAT { background: rgba(110,118,129,0.15); color: #8b949e; border: 1px solid rgba(110,118,129,0.3); }
-
-        .highlight { background-color: #bb8009; color: #0f1117; border-radius: 2px; padding: 0 2px; }
-
-        .empty-row td { text-align: center; padding: 40px; color: #6e7681; font-style: italic; }
-        .error-box {
-            background: #1a0a0a; border: 1px solid #f85149; border-radius: 8px;
-            padding: 14px 18px; color: #f85149; font-size: 0.88rem; margin-bottom: 16px;
-        }
-    </style>
 </head>
 
 <body>
 
 <div class="topbar">
     <div class="logo">
-        <span>Log</span><span>.</span><span>ic</span>
+        <span class="logo-log">Log</span><span class="logo-dot">.</span><span class="logo-ic">ic</span>
     </div>
 
     <!-- Filter buttons -->
@@ -155,34 +54,41 @@
     {% endif %}
 
     <div class="meta">
-        <span id="rowCount">{{ logs|length }} entries</span>
+        <span><strong id="rowCount">{{ logs|length }}</strong> entries</span>
         <span>Auto-refresh every 3s &bull; last updated: <span id="lastUpdated">just now</span></span>
     </div>
 
-    <table id="logTable">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Level</th>
-                <th>Log</th>
-            </tr>
-        </thead>
-        <tbody id="logTableBody">
-            {% if logs %}
-                {% for entry in logs %}
+    <div class="table-wrap">
+        <table id="logTable">
+            <thead>
                 <tr>
-                    <td class="col-date">{{ entry.date }}</td>
-                    <td class="col-time">{{ entry.time }}</td>
-                    <td class="col-level"><span class="pill pill-{{ entry.level }}">{{ entry.level }}</span></td>
-                    <td class="col-message">{{ entry.message }}</td>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Level</th>
+                    <th>Log</th>
                 </tr>
-                {% endfor %}
-            {% else %}
-                <tr class="empty-row"><td colspan="4">No log entries found.</td></tr>
-            {% endif %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody id="logTableBody">
+                {% if logs %}
+                    {% for entry in logs %}
+                    <tr>
+                        <td class="col-date">{{ entry.date }}</td>
+                        <td class="col-time">{{ entry.time }}</td>
+                        <td class="col-level"><span class="pill pill-{{ entry.level }}">{{ entry.level }}</span></td>
+                        <td class="col-message">{{ entry.message }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr class="empty-row">
+                        <td colspan="4">
+                            <span class="empty-icon">📭</span>
+                            <span class="empty-label">No log entries found.</span>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
@@ -231,7 +137,7 @@
         });
     }
 
-    // ── Auto-refresh ─────────────────────────────────────────
+    // ── Helpers ──────────────────────────────────────────────
     function escapeHtml(s) {
         return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
@@ -240,16 +146,26 @@
         return `pill pill-${level}`;
     }
 
+    // Track previously seen row count to detect new rows
+    let prevRowCount = {{ logs|length }};
+
     function buildRows(logs) {
         if (!logs || logs.length === 0)
-            return `<tr class="empty-row"><td colspan="4">No log entries found.</td></tr>`;
-        return logs.map(e => `
-            <tr>
+            return `<tr class="empty-row"><td colspan="4">
+                        <span class="empty-icon">📭</span>
+                        <span class="empty-label">No log entries found.</span>
+                    </td></tr>`;
+
+        return logs.map((e, i) => {
+            const isNew = i >= prevRowCount;
+            return `
+            <tr${isNew ? ' class="new-row"' : ''}>
                 <td class="col-date">${escapeHtml(e.date)}</td>
                 <td class="col-time">${escapeHtml(e.time)}</td>
                 <td class="col-level"><span class="${pillClass(e.level)}">${escapeHtml(e.level)}</span></td>
                 <td class="col-message">${escapeHtml(e.message)}</td>
-            </tr>`).join('');
+            </tr>`;
+        }).join('');
     }
 
     async function fetchLogs() {
@@ -260,6 +176,8 @@
             const data = await res.json();
 
             if (data.error) {
+                // Remove previous error boxes first
+                document.querySelectorAll('.error-box').forEach(el => el.remove());
                 document.querySelector('.content').insertAdjacentHTML(
                     'afterbegin', `<div class="error-box">${escapeHtml(data.error)}</div>`);
                 return;
@@ -267,6 +185,7 @@
 
             const atBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 40;
             document.getElementById('logTableBody').innerHTML = buildRows(data.logs);
+            prevRowCount = data.logs ? data.logs.length : 0;
             if (atBottom) window.scrollTo(0, document.body.scrollHeight);
 
             if (searchText) applySearch();
@@ -282,7 +201,7 @@
             const allEl = document.getElementById('count-ALL');
             if (allEl) allEl.textContent = total;
 
-            document.getElementById('rowCount').textContent = `${data.logs ? data.logs.length : 0} entries`;
+            document.getElementById('rowCount').textContent = prevRowCount;
             document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
 
             const badge = document.getElementById('liveBadge');
@@ -316,8 +235,5 @@
     setInterval(fetchLogs, 3000);
 </script>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
